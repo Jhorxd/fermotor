@@ -558,16 +558,13 @@ function calcular_total()
 	//PARA EL MODAL DE PAGO MULTIPLE INSERTAR EL TOTAL DE LA VENTA
 	$("#calcTotal").html(parseFloat(total).toFixed(2));
 }
-function limpiar()
-{
-  productos=[];
-  add_table();
-  productos_temp=[];
-  cuotas_temp=[];
- // $("#ruc_cliente").val("");
- // $("#nombre_cliente").val("");
- // $("#cliente").val("");
- $("#nombre_cliente").val("VARIOS - -");
+function limpiar() {
+	productos = [];
+	add_table();
+	productos_temp = [];
+	cuotas_temp = [];
+
+	$("#nombre_cliente").val("VARIOS - -");
 	$("#ruc_cliente").val("-");
 	$("#cliente").val(3);
 	$("#cboTipoDocu").val();
@@ -575,9 +572,13 @@ function limpiar()
 	$("#cboTipoDocu").val('N');
 	$("#forma_pago").val(1);
 	$("#condiciones_pago").val(1);
-  $("#direccionsuc").html("");
-  $("#search").val("");
-  calcular_total();
+
+	// ⚠️ Llama aquí a la función para que actualice la visibilidad del botón
+	ver_tipo_pago();
+
+	$("#direccionsuc").html("");
+	$("#search").val("");
+	calcular_total();
 	$("#results").html("");
 	$("#search_msj").show();
 	$("#tipo_persona").val("");
@@ -945,183 +946,205 @@ $("#close_modal_ticket").click(function(){
 	$("#modal_ticket").modal("hide");
 });
 
-function enviar()
-{
+function enviar() {
 
-	if ($("#forma_pago").val()=="") 
-	{
-		toastr.warning("Falta Forma de Pago")
-		return false;
-	}
+    if ($("#forma_pago").val() == "") {
+        toastr.warning("Falta Forma de Pago");
+        return false;
+    }
 
-	var datos = [];
-	var data=
-	{
-		"compania":compania,
-		"tipo_oper":"V",
-		"cboTipoDocu":$("#cboTipoDocu").val(),
-		"ordencompra":"",
-		"dRef":"",
-		"serie":$("#serie").val(),
-		"numero":"",
-		"numeroAutomatico":$("#numeroAutomatico").val(),
-		"igv":18,
-		"fecha":$("#fecha_temp").val(),
-		"fecha_vencimiento":$("#fecha_temp").val(),
-		"cliente":$("#cliente").val(),
-		"buscar_cliente":"",
-		"ruc_cliente":$("#ruc_cliente").val(),
-		"nombre_cliente":$("#nombre_cliente").val(),						
-		"tempde_TipCli":0,
-		"cboVendedor":$("#cboVendedor").val(),
-		"VerificadoSuccess":"",
-		"almacen":$("#almacen").val(),
-		"moneda":$("#moneda").val(),
-		"tdcDolar":$("#tdcDolar").val(),
-		"direccionsuc":$("#direccionsuc").val(),
-		"oc_cliente":"",
-		"obra":0,
-		"tipo_venta":1,
-		"descuento":0,
-		"docurefe_codigo":"",
-		"estado":"",
-		"applyRetencion_hidden":"",
-		"applyRetencion":"",
-		"retencion_codigo":"",
-		"retencion_porc":"",
-		"forma_pago":$("#forma_pago").val(),
-		"caja":$("#caja").val(),
-		"observacion":$("#observaciones").val(),
-		"descuentotal":0,
-		"exoneradototal":0,
-		"inafectototal":0,
-		"gratuitatotal":0,
-		"preciototal":0,
-		"gravadatotal":$("#subtotal").html(),
-		"igvtotal":$("#igv").html(),
-		"importeBolsa":0,
-		"importetotal":$("#total").html(),
-		"salir":0,
-		"codigo":"",
-		"contiene_igv":1,
-		"contacto":"",
-		"ordencompra":"",
-		"condiciones_pago":$("#condiciones_pago").val(),
-		"monto_temp":$("#monto_temp").val()
-	}
+    // Recolectando todos los datos
+    var datos = [];
+    var data = {
+        "compania": compania,
+        "tipo_oper": "V",
+        "cboTipoDocu": $("#cboTipoDocu").val(),
+        "ordencompra": "",
+        "dRef": "",
+        "serie": $("#serie").val(),
+        "numero": "",
+        "numeroAutomatico": $("#numeroAutomatico").val(),
+        "igv": 18,
+        "fecha": $("#fecha_temp").val(),
+        "fecha_vencimiento": $("#fecha_temp").val(),
+        "cliente": $("#cliente").val(),
+        "buscar_cliente": "",
+        "ruc_cliente": $("#ruc_cliente").val(),
+        "nombre_cliente": $("#nombre_cliente").val(),
+        "tempde_TipCli": 0,
+        "cboVendedor": $("#cboVendedor").val(),
+        "VerificadoSuccess": "",
+        "almacen": $("#almacen").val(),
+        "moneda": $("#moneda").val(),
+        "tdcDolar": $("#tdcDolar").val(),
+        "direccionsuc": $("#direccionsuc").val(),
+        "oc_cliente": "",
+        "obra": 0,
+        "tipo_venta": 1,
+        "descuento": 0,
+        "docurefe_codigo": "",
+        "estado": "",
+        "applyRetencion_hidden": "",
+        "applyRetencion": "",
+        "retencion_codigo": "",
+        "retencion_porc": "",
+        "forma_pago": $("#forma_pago").val(),
+        "caja": $("#caja").val(),
+        "observacion": $("#observaciones").val(),
+        "descuentotal": 0,
+        "exoneradototal": 0,
+        "inafectototal": 0,
+        "gratuitatotal": 0,
+        "preciototal": 0,
+        "gravadatotal": $("#subtotal").html(),
+        "igvtotal": $("#igv").html(),
+        "importeBolsa": 0,
+        "importetotal": $("#total").html(),
+        "salir": 0,
+        "codigo": "",
+        "contiene_igv": 1,
+        "contacto": "",
+        "ordencompra": "",
+        "condiciones_pago": $("#condiciones_pago").val(),
+        "monto_temp": $("#monto_temp").val()
+    };
 
-	datos.push(data);
+    // Log de datos principales
+    console.log("Datos principales:", data);
 
-	var array_total = [];
-	array_total.push({"Datos":datos,"Productos":productos,"Cuotas":cuotas_temp});
-	$("#datos").val(JSON.stringify(array_total));
+    datos.push(data);
 
-	array = $('#frmComprobante').serialize();
+    // Recolectar todas las formas de pago
+    var formasPago = [];
+    $('#tbFormasPago tbody tr').each(function () {
+        var formaPago = {
+            "cmbFormasPago": $(this).find('.cmbFormasPago').val(),
+            "cmbMoneda": $(this).find('.cmbMoneda').val(),
+            "monto": $(this).find('.monto').val()
+        };
+        formasPago.push(formaPago);
+    });
 
-	$(".btn-cuota-acept").prop("disabled", true);
-	$(".btn-cuota-recalc").prop("disabled", true);
-	$(".btn-cuota-acept").html("Espere...");
+    // Log de las formas de pago
+    console.log("Formas de pago:", formasPago);
 
-	$.ajax({
-		data:  array, 
-		url:   base_url + "index.php/ventas/comprobante/comprobante_insertar_array", 
-		type:  'POST',
-		beforeSend: function()
-		{
-			$("#imgload").show("slow");
-			$("#imgload").css("z-index",999);
-			$("#modal_pago").modal("hide");
+    // Añadir las formas de pago a los datos
+    data.formas_pago = formasPago;
 
-		},
-		success:  function (response) 
-		{
-			$("#imgload").hide("fast");
-			$("#imgload").css("z-index",0);
+    // Recolectando productos y cuotas
+    var array_total = [];
+    array_total.push({
+        "Datos": datos,
+        "Productos": productos,
+        "Cuotas": cuotas_temp
+    });
 
-			if (response=="error") 
-			{
-				Swal.fire(
-					'Ocurrio un Error!',
-					'No se pudo crear el Documento',
-					'warning'
-				)	
-				$(".btn-cuota-acept").prop("disabled", false);
-				$(".btn-cuota-acept").html("Generar");	                             		
-			}
-			if (response>0) 
-			{
-				toastr.success("Documento Creado, Cargando PDF...")
-				limpiar();
-				var tdoc=$("#cboTipoDocu").val();
-				$("#tbl-cuotas tbody").html("");
-				$("#div_mostrar_cuotas").hide();
-				$("#condiciones_de_pago").val(1);
-				$("#forma_pago").val(1);
+    // Log de datos finales antes de enviarlos
+    console.log("Datos a enviar:", array_total);
 
-				$("#last_sell").val(response);
-				$("#last_sell_tipo").val($("#cboTipoDocu").val());
-				$("#cboTipoDocu").val('N')
-				$("#modal_ticket").modal("show");
-				$("#tipo_persona").val("");
+    // Asignar los datos al input oculto
+    $("#datos").val(JSON.stringify(array_total));
 
-				if (tdoc=='N') 
-				{
-					$("#pdf").html('<embed src="'+base_url+'index.php/ventas/comprobante/comprobante_ver_pdf/'+response+'/TICKET" width="100%" height="400" type="application/pdf">');
-				}
-				else
-				{
-					abrir_pdf_envioSunat(response);
-				}
+    // Serializar el formulario
+    var array = $('#frmComprobante').serialize();
 
-				$(".btn-cuota-acept").prop("disabled", false);
-				$(".btn-cuota-recalc").prop("disabled", false);
-				$(".btn-cuota-acept").html("Generar");	   
+    // Log de la serialización del formulario
+    console.log("Formulario serializado:", array);
 
-			}
-			else 
-			{
-				var porciones = response.split('-');
-				if (porciones[1]=="ErrorFact") 
-				{
-					limpiar();
-					$("#tbl-cuotas tbody").html("");
-					$("#div_mostrar_cuotas").hide();
-					$("#condiciones_pago").val("");
-					$("#forma_pago").val(1);
-					$("#modal_pago").modal("hide");
-					$("#last_sell").val(response);
-					//$("#modal_ticket").modal("show");
-					$("#tipo_persona").val("");
+    $(".btn-cuota-acept").prop("disabled", true);
+    $(".btn-cuota-recalc").prop("disabled", true);
+    $(".btn-cuota-acept").html("Espere...");
 
-					$(".btn-cuota-acept").html("Generar");
+    // Enviar los datos al controlador mediante AJAX
+    $.ajax({
+        data: array,
+        url: base_url + "index.php/ventas/comprobante/comprobante_insertar_array",
+        type: 'POST',
+        beforeSend: function () {
+            $("#imgload").show("slow");
+            $("#imgload").css("z-index", 999);
+            $("#modal_pago").modal("hide");
+        },
+        success: function (response) {
+            $("#imgload").hide("fast");
+            $("#imgload").css("z-index", 0);
 
-					Swal.fire({
-						title: 'Documento Creado pero no Enviado a Sunat',
-						text: porciones[2],
-						icon: 'warning',
-						showCancelButton: true,
-						confirmButtonColor: '#3085d6',
-						cancelButtonColor: '#d33',
-						confirmButtonText: 'Volver a Enviar',
-						cancelButtonText: 'Enviar Luego'
-					}).then((result) => {
-						if (result.isConfirmed) {
-							$("#imgload").show("slow");
-							$("#imgload").css("z-index",999);
-							var comprobante=porciones[0];
-							disparador(comprobante,0);
-						}
-					})	
+            // Log de la respuesta
+            console.log("Respuesta del servidor:", response);
 
-					$(".btn-cuota-acept").prop("disabled", false);
-					$(".btn-cuota-recalc").prop("disabled", false);
-				} 
-			}
+            if (response == "error") {
+                Swal.fire(
+                    'Ocurrio un Error!',
+                    'No se pudo crear el Documento',
+                    'warning'
+                );
+                $(".btn-cuota-acept").prop("disabled", false);
+                $(".btn-cuota-acept").html("Generar");
+            }
 
-		}
+            if (response > 0) {
+                toastr.success("Documento Creado, Cargando PDF...");
+                limpiar();
+                var tdoc = $("#cboTipoDocu").val();
+                $("#tbl-cuotas tbody").html("");
+                $("#div_mostrar_cuotas").hide();
+                $("#condiciones_de_pago").val(1);
+                $("#forma_pago").val(1);
 
-	});
+                $("#last_sell").val(response);
+                $("#last_sell_tipo").val($("#cboTipoDocu").val());
+                $("#cboTipoDocu").val('N');
+                $("#modal_ticket").modal("show");
+                $("#tipo_persona").val("");
 
+                if (tdoc == 'N') {
+                    $("#pdf").html('<embed src="' + base_url + 'index.php/ventas/comprobante/comprobante_ver_pdf/' + response + '/TICKET" width="100%" height="400" type="application/pdf">');
+                } else {
+                    abrir_pdf_envioSunat(response);
+                }
+
+                $(".btn-cuota-acept").prop("disabled", false);
+                $(".btn-cuota-recalc").prop("disabled", false);
+                $(".btn-cuota-acept").html("Generar");
+
+            } else {
+                var porciones = response.split('-');
+                if (porciones[1] == "ErrorFact") {
+                    limpiar();
+                    $("#tbl-cuotas tbody").html("");
+                    $("#div_mostrar_cuotas").hide();
+                    $("#condiciones_pago").val("");
+                    $("#forma_pago").val(1);
+                    $("#modal_pago").modal("hide");
+                    $("#last_sell").val(response);
+                    $("#tipo_persona").val("");
+
+                    $(".btn-cuota-acept").html("Generar");
+
+                    Swal.fire({
+                        title: 'Documento Creado pero no Enviado a Sunat',
+                        text: porciones[2],
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Volver a Enviar',
+                        cancelButtonText: 'Enviar Luego'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $("#imgload").show("slow");
+                            $("#imgload").css("z-index", 999);
+                            var comprobante = porciones[0];
+                            disparador(comprobante, 0);
+                        }
+                    });
+
+                    $(".btn-cuota-acept").prop("disabled", false);
+                    $(".btn-cuota-recalc").prop("disabled", false);
+                }
+            }
+        }
+    });
 }
 
 $("#observaciones").keyup(function(){

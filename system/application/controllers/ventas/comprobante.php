@@ -91,7 +91,7 @@ class Comprobante extends Controller
         $this->load->model('configuracion_model');
         $this->load->library('My_PHPMailer');
 
-       
+
 
         $this->empresa = $this->session->userdata('empresa');
         $this->compania = $this->session->userdata('compania');
@@ -264,10 +264,10 @@ class Comprobante extends Controller
                             }
 
                         }/*else{
-                         $editar     = "<img src='" . base_url() . "images/error1.png' width='16' height='16' border='0' title='En observacion'>";
-                         $disparador .= "<span class='detallesWrong'><a onclick='consultar_estado($codigo, $item)'>Error de comunicación</a></span>";
-                         $img_estado = "";
-                     }*/
+                        $editar     = "<img src='" . base_url() . "images/error1.png' width='16' height='16' border='0' title='En observacion'>";
+                        $disparador .= "<span class='detallesWrong'><a onclick='consultar_estado($codigo, $item)'>Error de comunicación</a></span>";
+                        $img_estado = "";
+                    }*/
 
                         $pdfSunat = "<a href='#' onclick='abrir_pdf_envioSunat($codigo);' target='_parent'><img src='" . base_url() . "images/pdf-sunat.png' width='16' height='16' border='0' title='pdf sunat'></a>";
 
@@ -456,15 +456,15 @@ class Comprobante extends Controller
                             $movimiento = $this->disminuir_stock($comprobante);
                         } else {
                             $movimiento = $this->aumentar_stock($comprobante);
-                        
-                            
+
+
                             $data_comprobante = $this->comprobantedetalle_model->detalles($codigo);
-                            foreach($data_comprobante as $i => $val){
+                            foreach ($data_comprobante as $i => $val) {
                                 $codprod = $val->PROD_Codigo;
                                 $precio = $val->CPDEC_Precioventa;
                                 $preciominimo = $val->CPDEC_Precioventaminimo;
                                 $preciomaximo = $val->CPDEC_Precioventamaximo;
-                                $this->producto_model->modificar_costoventaAnterior($codprod, $precio,  $preciominimo, $preciomaximo);
+                                $this->producto_model->modificar_costoventaAnterior($codprod, $precio, $preciominimo, $preciomaximo);
                             }
                         }
 
@@ -2067,7 +2067,7 @@ class Comprobante extends Controller
                 $data['tdcDolar'] = '';
             }
 
-            $data['serie'] = '' ;
+            $data['serie'] = '';
             $data['numero'] = '';
 
             if ($tipo_oper == 'V') {
@@ -2259,20 +2259,20 @@ class Comprobante extends Controller
         $serie = $this->input->post('serie');
         $numero = $this->input->post('numero');
         $accion = $this->input->post("detaccion");
-        
+
 
         // Formas de Pago
         $formPagoFP = $this->input->post('cmbFormasPago');
         $monedaFP = $this->input->post('cmbMoneda');
         $montoFP = $this->input->post('monto');
 
-        $cmbFormasPago     = $this->input->post('cmbFormasPago');
+        $cmbFormasPago = $this->input->post('cmbFormasPago');
         $this->session->set_userdata('cmbFormasPago', $cmbFormasPago);
 
-        if($cajaMultiple== "on"){
+        if ($cajaMultiple == "on") {
             $cajaMultiple = "1";
-        }else{
-            $cajaMultiple = "0"; 
+        } else {
+            $cajaMultiple = "0";
         }
 
         $filter = new stdClass();
@@ -2601,7 +2601,7 @@ class Comprobante extends Controller
                     $filter->CPDEC_Costo = $prodpu_conigv[$indice];
                 }
                 ////
-                 //
+                //
                 $filter->CPDEC_ubipro = $produbi[$indice];
                 $filter->CPDEC_Socio = $prod_socio[$indice];
                 //
@@ -2615,7 +2615,7 @@ class Comprobante extends Controller
                 $filter->CPDEC_Observacion = $obs_detalle[$indice];
                 $filter->CPDEC_Pu = $prodpu[$indice];
                 $filter->CPDEC_Subtotal = $prodprecio[$indice];
-         
+
                 if ($detaccion[$indice] != 'e' && $detaccion[$indice] != 'EE') {
                     $this->comprobantedetalle_model->insertar($filter);
 
@@ -2708,7 +2708,7 @@ class Comprobante extends Controller
             if ($data->result == false) {
                 $json = array("result" => false, "msj" => $data->msj);
                 echo json_encode($json);
-            } else{
+            } else {
                 echo json_encode($json);
             }
         } else {
@@ -2844,6 +2844,33 @@ class Comprobante extends Controller
         }
 
         /*:::::: /// CUOTAS /// :::::::::::*/
+
+       // Obtener los datos desde el post (debe ser el JSON que envías)
+$array_total = json_decode($this->input->post('datos'), true);
+
+// Loguear el contenido del array para verificar la estructura
+// Extraer las formas de pago desde el array
+$formasPagoFP = isset($array_total[0]['Datos'][0]['formas_pago']) ? $array_total[0]['Datos'][0]['formas_pago'] : [];
+
+// Verificar que las formas de pago no estén vacías
+if (is_array($formasPagoFP) && count($formasPagoFP) > 0) {
+    foreach ($formasPagoFP as $fpago) {
+        $stdFormasPago = new StdClass();
+        $stdFormasPago->CPP_Codigo = $comprobante;  // Código del comprobante
+        $stdFormasPago->FORPAP_Codigo = $fpago['cmbFormasPago'];  // Código de la forma de pago
+        $stdFormasPago->MONED_Codigo = $fpago['cmbMoneda'];  // Código de la moneda
+        $stdFormasPago->monto = $fpago['monto'];  // Monto de la forma de pago
+        $stdFormasPago->compro_flag_FechaRegistro = date('Y-m-d H:i:s');  // Fecha de registro
+
+        // Loguear el objeto antes de la inserción
+        log_message('debug', 'Objeto de forma de pago: ' . print_r($stdFormasPago, true));
+
+        // Insertar si el monto no está vacío
+        if (!empty($fpago['monto'])) {
+            $this->comprobante_formapago_model->insertar($stdFormasPago);
+        }
+    }
+}
 
 
         if ($comprobante < 1 || $comprobante == "") {
@@ -4180,267 +4207,268 @@ class Comprobante extends Controller
         $this->load->view('ventas/comprobante_ver', $data);
     }
 
-        public function comprobante_editar($codigo, $tipo_oper = 'V', $tipo_docu = 'F')
-        {  
-       /* :::: SE CREA LA SESSION :::*/
-            $hoy = date('Y-m-d H:i:s');
-            $cadena = strtotime($hoy) . substr((string) microtime(), 1, 8);
-            $tempSession = str_replace('.', '', $cadena);
-            $data['tempSession'] = $tempSession;
-            /* :::::::::::::::::::::::::::*/
+    public function comprobante_editar($codigo, $tipo_oper = 'V', $tipo_docu = 'F')
+    {
+        /* :::: SE CREA LA SESSION :::*/
+        $hoy = date('Y-m-d H:i:s');
+        $cadena = strtotime($hoy) . substr((string) microtime(), 1, 8);
+        $tempSession = str_replace('.', '', $cadena);
+        $data['tempSession'] = $tempSession;
+        /* :::::::::::::::::::::::::::*/
 
-            $data["lista_cuotas"] = $this->cuota_model->listarByIdComprobante($codigo);
+        $data["lista_cuotas"] = $this->cuota_model->listarByIdComprobante($codigo);
 
-            $datos_comprobante = $this->comprobante_model->obtener_comprobante($codigo);
-            $compania = $datos_comprobante[0]->COMPP_Codigo;
-            $comp_confi = $this->companiaconfiguracion_model->obtener($compania);
-            $presupuesto = $datos_comprobante[0]->PRESUP_Codigo;
-            $ordencompra = $datos_comprobante[0]->OCOMP_Codigo;
-            $guiainp_codigo = $datos_comprobante[0]->GUIAINP_Codigo;
-            $guiasap_codigo = $datos_comprobante[0]->GUIASAP_Codigo;
-            $guiaremision = $datos_comprobante[0]->GUIAREMP_Codigo;
-            $proyecto = $datos_comprobante[0]->PROYP_Codigo;
-            $serie = $datos_comprobante[0]->CPC_Serie;
-            $numero = $datos_comprobante[0]->CPC_Numero;
-            $cliente = $datos_comprobante[0]->CLIP_Codigo;
-            $proveedor = $datos_comprobante[0]->PROVP_Codigo;
-            $forma_pago = $datos_comprobante[0]->FORPAP_Codigo;
-            $moneda = $datos_comprobante[0]->MONED_Codigo;
-            $subtotal = $datos_comprobante[0]->CPC_subtotal;
-            $descuento = $datos_comprobante[0]->CPC_descuento;
-            $igv = $datos_comprobante[0]->CPC_igv;
-            $total = $datos_comprobante[0]->CPC_total;
-            $subtotal_conigv = $datos_comprobante[0]->CPC_subtotal_conigv;
-            $descuento_conigv = $datos_comprobante[0]->CPC_descuento_conigv;
-            $igv100 = $datos_comprobante[0]->CPC_igv100;
-            $descuento100 = $datos_comprobante[0]->CPC_descuento100;
-            $guiarem_codigo = $datos_comprobante[0]->CPC_GuiaRemCodigo;
-            $docurefe_codigo = $datos_comprobante[0]->CPC_DocuRefeCodigo;
-            $observacion = $datos_comprobante[0]->CPC_Observacion;
-            $modo_impresion = $datos_comprobante[0]->CPC_ModoImpresion;
-            $estado = $datos_comprobante[0]->CPC_FlagEstado;
-            $fecha = $datos_comprobante[0]->CPC_Fecha;
-            $fecha_vencimiento = $datos_comprobante[0]->CPC_FechaVencimiento;
-            $vendedor = $datos_comprobante[0]->CPC_Vendedor;
-            $importacion = $datos_comprobante[0]->IMPOR_Nombre;
-            $direccion = $datos_comprobante[0]->CPC_Direccion;
-            $oc_cliente = $datos_comprobante[0]->CPP_Compracliente;
-            $codigoRetencion = $datos_comprobante[0]->CPC_Retencion;
-            $porcRetencion = $datos_comprobante[0]->CPC_RetencionPorc;
-            $caja = $datos_comprobante[0]->CAJA_Codigo;
-            $tipo_venta = $datos_comprobante[0]->CPC_Tipo_venta;
-            $condiciones_de_pago = $datos_comprobante[0]->CPC_NombreAuxiliar;
-            $almacen = $datos_comprobante[0]->ALMAP_Codigo;
+        $datos_comprobante = $this->comprobante_model->obtener_comprobante($codigo);
+        $compania = $datos_comprobante[0]->COMPP_Codigo;
+        $comp_confi = $this->companiaconfiguracion_model->obtener($compania);
+        $presupuesto = $datos_comprobante[0]->PRESUP_Codigo;
+        $ordencompra = $datos_comprobante[0]->OCOMP_Codigo;
+        $guiainp_codigo = $datos_comprobante[0]->GUIAINP_Codigo;
+        $guiasap_codigo = $datos_comprobante[0]->GUIASAP_Codigo;
+        $guiaremision = $datos_comprobante[0]->GUIAREMP_Codigo;
+        $proyecto = $datos_comprobante[0]->PROYP_Codigo;
+        $serie = $datos_comprobante[0]->CPC_Serie;
+        $numero = $datos_comprobante[0]->CPC_Numero;
+        $cliente = $datos_comprobante[0]->CLIP_Codigo;
+        $proveedor = $datos_comprobante[0]->PROVP_Codigo;
+        $forma_pago = $datos_comprobante[0]->FORPAP_Codigo;
+        $moneda = $datos_comprobante[0]->MONED_Codigo;
+        $subtotal = $datos_comprobante[0]->CPC_subtotal;
+        $descuento = $datos_comprobante[0]->CPC_descuento;
+        $igv = $datos_comprobante[0]->CPC_igv;
+        $total = $datos_comprobante[0]->CPC_total;
+        $subtotal_conigv = $datos_comprobante[0]->CPC_subtotal_conigv;
+        $descuento_conigv = $datos_comprobante[0]->CPC_descuento_conigv;
+        $igv100 = $datos_comprobante[0]->CPC_igv100;
+        $descuento100 = $datos_comprobante[0]->CPC_descuento100;
+        $guiarem_codigo = $datos_comprobante[0]->CPC_GuiaRemCodigo;
+        $docurefe_codigo = $datos_comprobante[0]->CPC_DocuRefeCodigo;
+        $observacion = $datos_comprobante[0]->CPC_Observacion;
+        $modo_impresion = $datos_comprobante[0]->CPC_ModoImpresion;
+        $estado = $datos_comprobante[0]->CPC_FlagEstado;
+        $fecha = $datos_comprobante[0]->CPC_Fecha;
+        $fecha_vencimiento = $datos_comprobante[0]->CPC_FechaVencimiento;
+        $vendedor = $datos_comprobante[0]->CPC_Vendedor;
+        $importacion = $datos_comprobante[0]->IMPOR_Nombre;
+        $direccion = $datos_comprobante[0]->CPC_Direccion;
+        $oc_cliente = $datos_comprobante[0]->CPP_Compracliente;
+        $codigoRetencion = $datos_comprobante[0]->CPC_Retencion;
+        $porcRetencion = $datos_comprobante[0]->CPC_RetencionPorc;
+        $caja = $datos_comprobante[0]->CAJA_Codigo;
+        $tipo_venta = $datos_comprobante[0]->CPC_Tipo_venta;
+        $condiciones_de_pago = $datos_comprobante[0]->CPC_NombreAuxiliar;
+        $almacen = $datos_comprobante[0]->ALMAP_Codigo;
 
-            $monto_forma_pago = $datos_comprobante[0]->FORPAP_Monto;
+        $monto_forma_pago = $datos_comprobante[0]->FORPAP_Monto;
 
-            $data['condiciones_de_pago'] = $condiciones_de_pago;
-            $data['compania'] = $compania;
-            $data['sucursal'] = $compania;
+        $data['condiciones_de_pago'] = $condiciones_de_pago;
+        $data['compania'] = $compania;
+        $data['sucursal'] = $compania;
 
-            $tdc = $datos_comprobante[0]->CPC_TDC;
-            $codigocliente = $datos_comprobante[0]->CLIP_Codigo;
-            $codigoproyecto = $datos_comprobante[0]->PROYP_Codigo;
+        $tdc = $datos_comprobante[0]->CPC_TDC;
+        $codigocliente = $datos_comprobante[0]->CLIP_Codigo;
+        $codigoproyecto = $datos_comprobante[0]->PROYP_Codigo;
 
-            if ($codigoproyecto != 0) {
-                $listaproyecto = $this->proyecto_model->seleccionar($codigoproyecto);
-                $data['cboObra'] = form_dropdown("obra", $listaproyecto, $codigoproyecto, " class='comboGrande'  id='obra' ");
-            } else {
-                $data['cboObra'] = form_dropdown("obra", array('' => ':: Seleccione ::'), "", " class='comboGrande'  id='obra'");
+        if ($codigoproyecto != 0) {
+            $listaproyecto = $this->proyecto_model->seleccionar($codigoproyecto);
+            $data['cboObra'] = form_dropdown("obra", $listaproyecto, $codigoproyecto, " class='comboGrande'  id='obra' ");
+        } else {
+            $data['cboObra'] = form_dropdown("obra", array('' => ':: Seleccione ::'), "", " class='comboGrande'  id='obra'");
+        }
+        $data["oc_cliente"] = $oc_cliente;
+        $data['numeroAutomatico'] = $datos_comprobante[0]->CPC_NumeroAutomatico;
+        $data['cmbVendedor'] = $this->select_cmbVendedor($vendedor);
+        $ruc_cliente = '';
+        $nombre_cliente = '';
+        $nombre_proveedor = '';
+        $ruc_proveedor = '';
+        if ($cliente != '' && $cliente != '0') {
+            $datos_cliente = $this->cliente_model->obtener($cliente);
+            if ($datos_cliente) {
+                $nombre_cliente = $datos_cliente->nombre;
+                $ruc_cliente = ($datos_cliente->ruc != '' && $datos_cliente->ruc != 0) ? $datos_cliente->ruc : $datos_cliente->dni;
+                $tipo_cliente = $datos_cliente->tipo;
             }
-            $data["oc_cliente"] = $oc_cliente;
-            $data['numeroAutomatico'] = $datos_comprobante[0]->CPC_NumeroAutomatico;
-            $data['cmbVendedor'] = $this->select_cmbVendedor($vendedor);
-            $ruc_cliente = '';
-            $nombre_cliente = '';
-            $nombre_proveedor = '';
-            $ruc_proveedor = '';
-            if ($cliente != '' && $cliente != '0') {
-                $datos_cliente = $this->cliente_model->obtener($cliente);
-                if ($datos_cliente) {
-                    $nombre_cliente = $datos_cliente->nombre;
-                    $ruc_cliente = ($datos_cliente->ruc != '' && $datos_cliente->ruc != 0) ? $datos_cliente->ruc : $datos_cliente->dni;
-                    $tipo_cliente = $datos_cliente->tipo;
-                }
-            } elseif ($proveedor != '' && $proveedor != '0') {
-                $datos_proveedor = $this->proveedor_model->obtener($proveedor);
-                if ($datos_proveedor) {
-                    $nombre_proveedor = $datos_proveedor->nombre;
-                    $ruc_proveedor = $datos_proveedor->ruc;
-                }
+        } elseif ($proveedor != '' && $proveedor != '0') {
+            $datos_proveedor = $this->proveedor_model->obtener($proveedor);
+            if ($datos_proveedor) {
+                $nombre_proveedor = $datos_proveedor->nombre;
+                $ruc_proveedor = $datos_proveedor->ruc;
             }
+        }
 
-            $data['cambio_comp'] = "0";
-            $data['total_det'] = "0";
+        $data['cambio_comp'] = "0";
+        $data['total_det'] = "0";
 
-            if ($tipo_oper == "V") {
-                $data['guia'] = $guiasap_codigo;
-            } else {
-                $data['guia'] = $guiainp_codigo;
+        if ($tipo_oper == "V") {
+            $data['guia'] = $guiasap_codigo;
+        } else {
+            $data['guia'] = $guiainp_codigo;
+        }
+
+        $documento = $this->documento_model->obtenerAbreviatura(trim($tipo_docu));
+        $tipo = $documento[0]->DOCUP_Codigo;
+
+        $listaGuiarem = array();
+        $listaGuiarem = null;
+        $estadoAsociacion = 1;
+        $listaGuiaremAsociados = $this->comprobante_model->buscarComprobanteGuiarem($codigo, $estadoAsociacion);
+        if (count($listaGuiaremAsociados) > 0) {
+            foreach ($listaGuiaremAsociados as $j => $valorGuiarem) {
+                $objeto = new stdClass();
+                $objeto->codigoGuiarem = $valorGuiarem->GUIAREMP_Codigo;
+                $objeto->serie = $valorGuiarem->GUIAREMC_Serie;
+                $objeto->numero = $valorGuiarem->GUIAREMC_Numero;
+                $listaGuiarem[] = $objeto;
             }
+        }
+        $data['listaGuiaremAsociados'] = $listaGuiarem;
 
-            $documento = $this->documento_model->obtenerAbreviatura(trim($tipo_docu));
-            $tipo = $documento[0]->DOCUP_Codigo;
+        $data['direccionsuc'] = form_input(array("name" => "direccionsuc", "id" => "direccionsuc", "class" => "cajaGeneral", "size" => "40", "maxlength" => "250", "value" => $direccion));
+        $data['codigo'] = $codigo;
+        $data['tipo_docu'] = $tipo_docu;
+        $data['tipo_oper'] = $tipo_oper;
+        $lista_almacen = $this->almacen_model->seleccionar();
+        $data['cboAlmacen'] = form_dropdown("almacen", $lista_almacen, $almacen, " class='comboGrande' style='' id='almacen'");
 
-            $listaGuiarem = array();
-            $listaGuiarem = null;
-            $estadoAsociacion = 1;
-            $listaGuiaremAsociados = $this->comprobante_model->buscarComprobanteGuiarem($codigo, $estadoAsociacion);
-            if (count($listaGuiaremAsociados) > 0) {
-                foreach ($listaGuiaremAsociados as $j => $valorGuiarem) {
-                    $objeto = new stdClass();
-                    $objeto->codigoGuiarem = $valorGuiarem->GUIAREMP_Codigo;
-                    $objeto->serie = $valorGuiarem->GUIAREMC_Serie;
-                    $objeto->numero = $valorGuiarem->GUIAREMC_Numero;
-                    $listaGuiarem[] = $objeto;
-                }
-            }
-            $data['listaGuiaremAsociados'] = $listaGuiarem;
+        $data['cboFormaPago'] = $this->OPTION_generador($this->formapago_model->listar(), 'FORPAP_Codigo', 'FORPAC_Descripcion', $forma_pago);
+        $data['cboFormaPagosmulti'] = $this->OPTION_generador($this->formapago_model->listarmulti(), 'FORPAP_Codigo', 'FORPAC_Descripcion', $forma_pago);
+        $data['othersFormasP'] = $this->comprobante_formapago_model->getList($codigo);
+        $data['cboMoneda'] = $this->OPTION_generador($this->moneda_model->listar(), 'MONED_Codigo', 'MONED_Descripcion', $moneda);
+        $data['cboVendedor'] = $this->lib_props->listarVendedores($vendedor);
+        $data['cajas'] = $this->caja_model->getCajas();
+        $data['caja'] = "$caja";
+        $data['serie'] = $serie;
+        $data['numero'] = $numero;
+        $data['usa_adelanto'] = $datos_comprobante[0]->CPC_FlagUsaAdelanto;
 
-            $data['direccionsuc'] = form_input(array("name" => "direccionsuc", "id" => "direccionsuc", "class" => "cajaGeneral", "size" => "40", "maxlength" => "250", "value" => $direccion));
-            $data['codigo'] = $codigo;
-            $data['tipo_docu'] = $tipo_docu;
-            $data['tipo_oper'] = $tipo_oper;
-            $lista_almacen = $this->almacen_model->seleccionar();
-            $data['cboAlmacen'] = form_dropdown("almacen", $lista_almacen, $almacen, " class='comboGrande' style='' id='almacen'");
+        $data['montoFP'] = $monto_forma_pago;
+        $data['othersFormasP'] = $this->comprobante_formapago_model->getList($codigo);
+        $data['ordencompra'] = $ordencompra;
+        /**verificamos si orden de compra existe **/
+        if ($ordencompra != null && $ordencompra != 0 && trim($ordencompra) != "") {
+            $datosOrdenCompra = $this->ocompra_model->obtener_ocompra($ordencompra);
+            $data['serieOC'] = $datosOrdenCompra[0]->OCOMC_Serie;
+            $data['numeroOC'] = $datosOrdenCompra[0]->OCOMC_Numero;
+            $data['valorOC'] = ($tipo_oper == "V") ? "0" : "1";
+        }
+        /**fin de verificacion**/
+        $data['presupuesto_codigo'] = $presupuesto;
 
-            $data['cboFormaPago'] = $this->OPTION_generador($this->formapago_model->listar(), 'FORPAP_Codigo', 'FORPAC_Descripcion', $forma_pago);
-            $data['cboFormaPagosmulti'] = $this->OPTION_generador($this->formapago_model->listarmulti(), 'FORPAP_Codigo', 'FORPAC_Descripcion', $forma_pago);
-            $data['othersFormasP']  = $this->comprobante_formapago_model->getList($codigo);
-            $data['cboMoneda'] = $this->OPTION_generador($this->moneda_model->listar(), 'MONED_Codigo', 'MONED_Descripcion', $moneda);
-            $data['cboVendedor'] = $this->lib_props->listarVendedores($vendedor);
-            $data['cajas'] = $this->caja_model->getCajas();
-            $data['caja'] = "$caja";
-            $data['serie'] = $serie;
-            $data['numero'] = $numero;
-            $data['usa_adelanto'] = $datos_comprobante[0]->CPC_FlagUsaAdelanto;
+        /**verificamos si presupuesto o cotizacion  existe **/
+        if ($presupuesto != null && $presupuesto != 0 && trim($presupuesto) != "") {
+            $datosOrdenCompra = $this->presupuesto_model->obtener_presupuesto($presupuesto);
+            $data['seriePre'] = $datosOrdenCompra[0]->PRESUC_Serie;
+            $data['numeroPre'] = $datosOrdenCompra[0]->PRESUC_Numero;
+        }
+        /**fin de verificacion**/
 
-            $data['montoFP'] = $monto_forma_pago;
-            $data['othersFormasP'] = $this->comprobante_formapago_model->getList($codigo);
-            $data['ordencompra'] = $ordencompra;
-            /**verificamos si orden de compra existe **/
-            if ($ordencompra != null && $ordencompra != 0 && trim($ordencompra) != "") {
-                $datosOrdenCompra = $this->ocompra_model->obtener_ocompra($ordencompra);
-                $data['serieOC'] = $datosOrdenCompra[0]->OCOMC_Serie;
-                $data['numeroOC'] = $datosOrdenCompra[0]->OCOMC_Numero;
-                $data['valorOC'] = ($tipo_oper == "V") ? "0" : "1";
-            }
-            /**fin de verificacion**/
-            $data['presupuesto_codigo'] = $presupuesto;
+        $data['descuento'] = $descuento100;
+        $data['igv'] = $igv100;
+        $data['igv_default'] = $comp_confi[0]->COMPCONFIC_Igv;
+        $data['preciototal'] = $subtotal;
+        $data['descuentotal'] = $descuento;
+        $data['igvtotal'] = $igv;
+        $data['importetotal'] = $total;
+        $data['preciototal_conigv'] = $subtotal_conigv;
+        $data['descuentotal_conigv'] = $descuento_conigv;
+        $data['tipocliente_doc'] = $tipo_cliente;
+        $data['cliente'] = $cliente;
+        $data['ruc_cliente'] = $ruc_cliente;
+        $data['nombre_cliente'] = $nombre_cliente;
+        $data['proveedor'] = $proveedor;
+        $data['ruc_proveedor'] = $ruc_proveedor;
+        $data['nombre_proveedor'] = $nombre_proveedor;
+        $data['contiene_igv'] = (($comp_confi[0]->COMPCONFIC_PrecioContieneIgv == '1') ? true : false);
+        $oculto = form_hidden(array('codigo' => $codigo, 'base_url' => base_url(), 'tipo_oper' => $tipo_oper, 'tipo_docu' => $tipo_docu, 'contiene_igv' => ($data['contiene_igv'] == true ? '1' : '0')));
+        $data['titulo'] = "EDITAR " . strtoupper($this->obtener_tipo_documento($tipo_docu));
+        $data['tipo_docu'] = $tipo_docu;
+        $data['formulario'] = "frmComprobante";
+        $data['oculto'] = $oculto;
+        $data['url_action'] = base_url() . "index.php/ventas/comprobante/comprobante_modificar";
+        $atributos = array('width' => 700, 'height' => 450, 'scrollbars' => 'yes', 'status' => 'yes', 'resizable' => 'yes', 'screenx' => '0', 'screeny' => '0');
+        $contenido = "<img height='16' width='16' src='" . base_url() . "images/ver.png' title='Buscar Cliente' border='0'>";
 
-            /**verificamos si presupuesto o cotizacion  existe **/
-            if ($presupuesto != null && $presupuesto != 0 && trim($presupuesto) != "") {
-                $datosOrdenCompra = $this->presupuesto_model->obtener_presupuesto($presupuesto);
-                $data['seriePre'] = $datosOrdenCompra[0]->PRESUC_Serie;
-                $data['numeroPre'] = $datosOrdenCompra[0]->PRESUC_Numero;
-            }
-            /**fin de verificacion**/
+        $data['hoy'] = $fecha;
+        $data['fecha_vencimiento'] = $fecha_vencimiento;
+        $data['guiarem_codigo'] = $guiarem_codigo;
+        $data['docurefe_codigo'] = $docurefe_codigo;
+        $data['observacion'] = $observacion;
+        $data['estado'] = $estado;
+        $data['hidden'] = "";
+        $data['focus'] = "";
+        $data['modo_impresion'] = $modo_impresion;
+        $data['serie_suger'] = "";
+        $data['numero_suger'] = "";
+        $data['tdcDolar'] = $moneda > 2 ? $datos_comprobante[0]->CPC_TDC_opcional : $tdc;
+        $data['tdcEuro'] = $moneda > 2 ? $tdc : '';
+        $data['id_proyecto'] = $codigoproyecto;
+        $data["codigoRetencion"] = $codigoRetencion;
+        $data["porcRetencion"] = $porcRetencion;
+        $data['guiaremision'] = $guiaremision;
+        $data['dRef'] = $guiaremision;
+        $data['tipoOperCodigo'] = $tipo;
+        $data["documentosNatural"] = $this->tipodocumento_model->listar_tipo_documento();
+        $data["documentosJuridico"] = $this->tipocodigo_model->listar_tipo_codigo();
+        $data['afectaciones'] = $this->producto_model->tipo_afectacion();
+        $data['tipo_venta'] = $tipo_venta;
+        $data['sunat_transaction'] = $this->sunat_model->getTransactions();
 
-            $data['descuento'] = $descuento100;
-            $data['igv'] = $igv100;
-            $data['igv_default'] = $comp_confi[0]->COMPCONFIC_Igv;
-            $data['preciototal'] = $subtotal;
-            $data['descuentotal'] = $descuento;
-            $data['igvtotal'] = $igv;
-            $data['importetotal'] = $total;
-            $data['preciototal_conigv'] = $subtotal_conigv;
-            $data['descuentotal_conigv'] = $descuento_conigv;
-            $data['tipocliente_doc'] = $tipo_cliente;
-            $data['cliente'] = $cliente;
-            $data['ruc_cliente'] = $ruc_cliente;
-            $data['nombre_cliente'] = $nombre_cliente;
-            $data['proveedor'] = $proveedor;
-            $data['ruc_proveedor'] = $ruc_proveedor;
-            $data['nombre_proveedor'] = $nombre_proveedor;
-            $data['contiene_igv'] = (($comp_confi[0]->COMPCONFIC_PrecioContieneIgv == '1') ? true : false);
-            $oculto = form_hidden(array('codigo' => $codigo, 'base_url' => base_url(), 'tipo_oper' => $tipo_oper, 'tipo_docu' => $tipo_docu, 'contiene_igv' => ($data['contiene_igv'] == true ? '1' : '0')));
-            $data['titulo'] = "EDITAR " . strtoupper($this->obtener_tipo_documento($tipo_docu));
-            $data['tipo_docu'] = $tipo_docu;
-            $data['formulario'] = "frmComprobante";
-            $data['oculto'] = $oculto;
-            $data['url_action'] = base_url() . "index.php/ventas/comprobante/comprobante_modificar";
-            $atributos = array('width' => 700, 'height' => 450, 'scrollbars' => 'yes', 'status' => 'yes', 'resizable' => 'yes', 'screenx' => '0', 'screeny' => '0');
-            $contenido = "<img height='16' width='16' src='" . base_url() . "images/ver.png' title='Buscar Cliente' border='0'>";
+        //DETRACCIONES
 
-            $data['hoy'] = $fecha;
-            $data['fecha_vencimiento'] = $fecha_vencimiento;
-            $data['guiarem_codigo'] = $guiarem_codigo;
-            $data['docurefe_codigo'] = $docurefe_codigo;
-            $data['observacion'] = $observacion;
-            $data['estado'] = $estado;
-            $data['hidden'] = "";
-            $data['focus'] = "";
-            $data['modo_impresion'] = $modo_impresion;
-            $data['serie_suger'] = "";
-            $data['numero_suger'] = "";
-            $data['tdcDolar'] = $moneda > 2 ? $datos_comprobante[0]->CPC_TDC_opcional : $tdc;
-            $data['tdcEuro'] = $moneda > 2 ? $tdc : '';
-            $data['id_proyecto'] = $codigoproyecto;
-            $data["codigoRetencion"] = $codigoRetencion;
-            $data["porcRetencion"] = $porcRetencion;
-            $data['guiaremision'] = $guiaremision;
-            $data['dRef'] = $guiaremision;
-            $data['tipoOperCodigo'] = $tipo;
-            $data["documentosNatural"] = $this->tipodocumento_model->listar_tipo_documento();
-            $data["documentosJuridico"] = $this->tipocodigo_model->listar_tipo_codigo();
-            $data['afectaciones'] = $this->producto_model->tipo_afectacion();
-            $data['tipo_venta'] = $tipo_venta;
-            $data['sunat_transaction'] = $this->sunat_model->getTransactions();
+        $tipo_detraccion = $datos_comprobante[0]->CPC_Tipodetraccion;
+        $por_detraccion = $datos_comprobante[0]->CPC_Pordetraccion;
+        $medio_pago_det = $datos_comprobante[0]->CPC_Pagodetraccion;
 
-            //DETRACCIONES
+        $data['tipo_detraccion'] = $tipo_detraccion;
+        $data['por_detraccion'] = $por_detraccion;
+        $data['medio_pago_det'] = $medio_pago_det;
+        $data['medio_de_pago_detraccion'] = $this->sunat_model->getPagoDetracciones();
+        $data['detraccion_tipo'] = $this->sunat_model->getDetracciones();
 
-            $tipo_detraccion = $datos_comprobante[0]->CPC_Tipodetraccion;
-            $por_detraccion = $datos_comprobante[0]->CPC_Pordetraccion;
-            $medio_pago_det = $datos_comprobante[0]->CPC_Pagodetraccion;
-
-            $data['tipo_detraccion'] = $tipo_detraccion;
-            $data['por_detraccion'] = $por_detraccion;
-            $data['medio_pago_det'] = $medio_pago_det;
-            $data['medio_de_pago_detraccion'] = $this->sunat_model->getPagoDetracciones();
-            $data['detraccion_tipo'] = $this->sunat_model->getDetracciones();
-
-            //FIN DETRACCION
+        //FIN DETRACCION
 
         //eliminar las opciones multiples si en la forma pago general no es multiple la seleccionada
-        
+
         $f_pago = $this->session->userdata('cmbFormasPago');
         if ($f_pago != 22) {
-    
-        $this->comprobante_formapago_model->deleteforComprobante($codigo);
-        };
+
+            $this->comprobante_formapago_model->deleteforComprobante($codigo);
+        }
+        ;
         //fin 
 
-            //PERCEPCIONES
-            $percepcion_tipo = $datos_comprobante[0]->CPC_Percepcion;
-            $data['percepcion_tipo'] = $percepcion_tipo;
-            //FIN PERCEPCION
+        //PERCEPCIONES
+        $percepcion_tipo = $datos_comprobante[0]->CPC_Percepcion;
+        $data['percepcion_tipo'] = $percepcion_tipo;
+        //FIN PERCEPCION
 
-            //Nuevo producto
-            $filterOrden = new stdClass();
-            $filterOrden->dir = "ASC";
-            $filterOrden->order = "FABRIC_Descripcion";
-            $data['fabricantes'] = $this->fabricante_model->getFabricantes($filterOrden);
+        //Nuevo producto
+        $filterOrden = new stdClass();
+        $filterOrden->dir = "ASC";
+        $filterOrden->order = "FABRIC_Descripcion";
+        $data['fabricantes'] = $this->fabricante_model->getFabricantes($filterOrden);
 
-            $filterOrden->order = "MARCC_Descripcion";
-            $data['marcas'] = $this->marca_model->getMarcas($filterOrden);
-            $flagBS = "B";
-            $data['socios'] = $this->directivo_model->getSocios();
+        $filterOrden->order = "MARCC_Descripcion";
+        $data['marcas'] = $this->marca_model->getMarcas($filterOrden);
+        $flagBS = "B";
+        $data['socios'] = $this->directivo_model->getSocios();
 
 
-            $data['familias'] = $this->producto_model->getFamilias($flagBS);
-            $filterOrden->order = "UNDMED_Descripcion";
-            $data['unidades'] = $this->unidadmedida_model->getUmedidas($filterOrden);
-            $data['afectaciones'] = $this->producto_model->tipo_afectacion();
+        $data['familias'] = $this->producto_model->getFamilias($flagBS);
+        $filterOrden->order = "UNDMED_Descripcion";
+        $data['unidades'] = $this->unidadmedida_model->getUmedidas($filterOrden);
+        $data['afectaciones'] = $this->producto_model->tipo_afectacion();
 
-            $data["precio_monedas"] = $this->moneda_model->getMonedas();
-            $data["precio_categorias"] = $this->tipocliente_model->getCategorias();
+        $data["precio_monedas"] = $this->moneda_model->getMonedas();
+        $data["precio_categorias"] = $this->tipocliente_model->getCategorias();
 
-            //Fin Nuevo producto
+        //Fin Nuevo producto
 
-            $data['isEdit'] = true;
+        $data['isEdit'] = true;
 
-            $this->layout->view('ventas/comprobante_nueva', $data);
-        }
+        $this->layout->view('ventas/comprobante_nueva', $data);
+    }
 
     public function comprobante_modificar()
     {
@@ -4485,8 +4513,8 @@ class Comprobante extends Controller
         $prodcantidad = $this->input->post('prodcantidad');
         $proddescri = $this->input->post('proddescri');
         $codigo = $this->input->post('codigo');
-        
-        
+
+
 
         $tipo_oper = $this->input->post('tipo_oper');
         $tipo_docu = $this->input->post('tipo_docu');
@@ -7660,98 +7688,99 @@ class Comprobante extends Controller
         //$this->load->view('ventas/ventana_canje', $data);
     }
 
-    public function canjear_documento(){
+    public function canjear_documento()
+    {
 
-        
-        $compania           = $this->session->userdata('compania');
 
-        $cliente            = $this->input->post('cod_cliente');
-        $fecha              = date('Y-m-d');
-        $comprobantes       = $this->input->post('cod_comprobante');
+        $compania = $this->session->userdata('compania');
 
-        $tipo_docu          = $this->input->post('cmbDocumento');
-        $user               = $this->session->userdata('user');
-        $numeroAutomatico   = $this->input->post('numeroAutomatico');
-        $tipo_operacion     = $this->input->post('tipo_operacion');
-        $observaciones      = $this->input->post('observaciones');
-        
+        $cliente = $this->input->post('cod_cliente');
+        $fecha = date('Y-m-d');
+        $comprobantes = $this->input->post('cod_comprobante');
+
+        $tipo_docu = $this->input->post('cmbDocumento');
+        $user = $this->session->userdata('user');
+        $numeroAutomatico = $this->input->post('numeroAutomatico');
+        $tipo_operacion = $this->input->post('tipo_operacion');
+        $observaciones = $this->input->post('observaciones');
+
         $subtotal = $total / (1 + ($t_igv / 100));
         $igv = $total - $subtotal;
 
         $detalle = $this->comprobantedetalle_model->listar($comprobantes);
-        $datos   = $this->comprobante_model->obtener_comprobante($comprobantes);
+        $datos = $this->comprobante_model->obtener_comprobante($comprobantes);
 
         if ($tipo_docu == 'F') {
             $tipo = 8;
         }
-        
+
         if ($tipo_docu == 'B') {
             $tipo = 9;
         }
 
-        if($datos[0]->CPC_TipoOperacion=="V"){
-            $numeroAutomatico   = 1;
+        if ($datos[0]->CPC_TipoOperacion == "V") {
+            $numeroAutomatico = 1;
             $cofiguracion_datos = $this->configuracion_model->obtener_numero_documento($compania, $tipo);
-            $serie              = $cofiguracion_datos[0]->CONFIC_Serie;
-            $numero             = $cofiguracion_datos[0]->CONFIC_Numero + 1;
-        }else{
-            $serie  = $this->input->post('serie_suger_b');
+            $serie = $cofiguracion_datos[0]->CONFIC_Serie;
+            $numero = $cofiguracion_datos[0]->CONFIC_Numero + 1;
+        } else {
+            $serie = $this->input->post('serie_suger_b');
             $numero = $this->input->post('numero_suger_b');
         }
 
         $filter = new stdClass();
-        $tipoOperacion              = $datos[0]->CPC_TipoOperacion;
-        $filter->CPC_TipoOperacion  = $tipoOperacion;
-        $filter->CPC_TipoDocumento  = $tipo_docu;
-        $filter->PRESUP_Codigo      = $datos[0]->PRESUP_Codigo;
-        $filter->OCOMP_Codigo       = $datos[0]->OCOMP_Codigo;
-        $filter->COMPP_Codigo       = $datos[0]->COMPP_Codigo;
-        $filter->CPC_Serie          = $serie;
-        $filter->CPC_Numero         = $numero;
-        
-        if ($tipoOperacion=="V") {
-            $filter->CLIP_Codigo    = $cliente;
-            $filter->PROVP_Codigo   = $datos[0]->PROVP_Codigo;
-        }else{
-            $filter->CLIP_Codigo    = $datos[0]->CLIP_Codigo;
-            $filter->PROVP_Codigo   = $cliente;
+        $tipoOperacion = $datos[0]->CPC_TipoOperacion;
+        $filter->CPC_TipoOperacion = $tipoOperacion;
+        $filter->CPC_TipoDocumento = $tipo_docu;
+        $filter->PRESUP_Codigo = $datos[0]->PRESUP_Codigo;
+        $filter->OCOMP_Codigo = $datos[0]->OCOMP_Codigo;
+        $filter->COMPP_Codigo = $datos[0]->COMPP_Codigo;
+        $filter->CPC_Serie = $serie;
+        $filter->CPC_Numero = $numero;
+
+        if ($tipoOperacion == "V") {
+            $filter->CLIP_Codigo = $cliente;
+            $filter->PROVP_Codigo = $datos[0]->PROVP_Codigo;
+        } else {
+            $filter->CLIP_Codigo = $datos[0]->CLIP_Codigo;
+            $filter->PROVP_Codigo = $cliente;
         }
 
-        $filter->CPC_NombreAuxiliar     = $datos[0]->CPC_NombreAuxiliar;
-        $filter->USUA_Codigo            = $user;
-        $filter->MONED_Codigo           = $datos[0]->MONED_Codigo;
-        $filter->FORPAP_Codigo          = $datos[0]->FORPAP_Codigo;
-        $filter->CPC_igv100             = $datos[0]->CPC_igv100;
-        $filter->CPC_total              = $datos[0]->CPC_total;
-        $filter->CPC_subtotal           = $datos[0]->CPC_subtotal;
-        $filter->CPC_descuento          = $datos[0]->CPC_descuento;
-        $filter->CPC_igv                = $datos[0]->CPC_igv;
-        $filter->CPC_subtotal_conigv    = $datos[0]->CPC_subtotal_conigv;
-        $filter->CPC_descuento_conigv   = $datos[0]->CPC_descuento_conigv;
-        $filter->CPC_descuento100       = $datos[0]->CPC_descuento100;
-        $filter->GUIAREMP_Codigo        = $datos[0]->GUIAREMP_Codigo;
-        $filter->CPC_GuiaRemCodigo      = $datos[0]->CPC_GuiaRemCodigo;
-        $filter->CPC_DocuRefeCodigo     = $datos[0]->CPP_Codigo;
-        $filter->CPC_Observacion        = $datos[0]->CPC_Observacion.' '.$observaciones;
-        $filter->CPC_ModoImpresion      = $datos[0]->CPC_ModoImpresion;
-        $filter->CPC_Fecha              = $fecha;
-        $filter->CPC_Vendedor           = $datos[0]->CPC_Vendedor;
-        $filter->CPC_TDC                = $datos[0]->CPC_TDC;
-        $filter->CPC_FlagMueveStock     = $datos[0]->CPC_FlagMueveStock;
-        $filter->GUIASAP_Codigo         = $datos[0]->GUIASAP_Codigo;
-        $filter->GUIAINP_Codigo         = $datos[0]->GUIAINP_Codigo;
-        $filter->USUA_anula             = $datos[0]->USUA_anula;
-        $filter->CPC_FechaRegistro      = $datos[0]->CPC_FechaRegistro;
-        $filter->CPC_FechaModificacion  = $datos[0]->CPC_FechaModificacion;
-        $filter->CPC_FlagEstado         = $datos[0]->CPC_FlagEstado;
-        $filter->CPC_Hora               = $datos[0]->CPC_Hora;
-        $filter->ALMAP_Codigo           = $datos[0]->ALMAP_Codigo;
-        $filter->CPC_NumeroAutomatico   = $numeroAutomatico;
-        $filter->CPP_Codigo_Canje       = 0;
+        $filter->CPC_NombreAuxiliar = $datos[0]->CPC_NombreAuxiliar;
+        $filter->USUA_Codigo = $user;
+        $filter->MONED_Codigo = $datos[0]->MONED_Codigo;
+        $filter->FORPAP_Codigo = $datos[0]->FORPAP_Codigo;
+        $filter->CPC_igv100 = $datos[0]->CPC_igv100;
+        $filter->CPC_total = $datos[0]->CPC_total;
+        $filter->CPC_subtotal = $datos[0]->CPC_subtotal;
+        $filter->CPC_descuento = $datos[0]->CPC_descuento;
+        $filter->CPC_igv = $datos[0]->CPC_igv;
+        $filter->CPC_subtotal_conigv = $datos[0]->CPC_subtotal_conigv;
+        $filter->CPC_descuento_conigv = $datos[0]->CPC_descuento_conigv;
+        $filter->CPC_descuento100 = $datos[0]->CPC_descuento100;
+        $filter->GUIAREMP_Codigo = $datos[0]->GUIAREMP_Codigo;
+        $filter->CPC_GuiaRemCodigo = $datos[0]->CPC_GuiaRemCodigo;
+        $filter->CPC_DocuRefeCodigo = $datos[0]->CPP_Codigo;
+        $filter->CPC_Observacion = $datos[0]->CPC_Observacion . ' ' . $observaciones;
+        $filter->CPC_ModoImpresion = $datos[0]->CPC_ModoImpresion;
+        $filter->CPC_Fecha = $fecha;
+        $filter->CPC_Vendedor = $datos[0]->CPC_Vendedor;
+        $filter->CPC_TDC = $datos[0]->CPC_TDC;
+        $filter->CPC_FlagMueveStock = $datos[0]->CPC_FlagMueveStock;
+        $filter->GUIASAP_Codigo = $datos[0]->GUIASAP_Codigo;
+        $filter->GUIAINP_Codigo = $datos[0]->GUIAINP_Codigo;
+        $filter->USUA_anula = $datos[0]->USUA_anula;
+        $filter->CPC_FechaRegistro = $datos[0]->CPC_FechaRegistro;
+        $filter->CPC_FechaModificacion = $datos[0]->CPC_FechaModificacion;
+        $filter->CPC_FlagEstado = $datos[0]->CPC_FlagEstado;
+        $filter->CPC_Hora = $datos[0]->CPC_Hora;
+        $filter->ALMAP_Codigo = $datos[0]->ALMAP_Codigo;
+        $filter->CPC_NumeroAutomatico = $numeroAutomatico;
+        $filter->CPP_Codigo_Canje = 0;
 
         $comprobante = $this->comprobante_model->insertar_comprobante2($filter);
 
-        if( $numeroAutomatico == 1 ){
+        if ($numeroAutomatico == 1) {
             $this->configuracion_model->modificar_configuracion($compania, $tipo, $numero);
         }
 
@@ -7763,48 +7792,48 @@ class Comprobante extends Controller
 
         foreach ($detalle as $key => $value) {
             $d_filter = [
-                'CPP_Codigo'             => $comprobante,
-                'PROD_Codigo'            => $value->PROD_Codigo,
-                'LOTP_Codigo'            => $value->LOTP_Codigo, // $lote;
-                'AFECT_Codigo'           => $value->AFECT_Codigo, // $tafectacion;
-                'CPDEC_GenInd'           => $value->CPDEC_GenInd,
-                'UNDMED_Codigo'          => $value->UNDMED_Codigo,
-                'CPDEC_Cantidad'         => $value->CPDEC_Cantidad,
-                'CPDEC_Pu'               => $value->CPDEC_Pu,
-                'CPDEC_Subtotal'         => $value->CPDEC_Subtotal,
-                'CPDEC_Descuento'        => $value->CPDEC_Descuento,
-                'CPDEC_Igv'              => $value->CPDEC_Igv,
-                'CPDEC_Total'            => $value->CPDEC_Total,
-                'CPDEC_Pu_ConIgv'        => $value->CPDEC_Pu_ConIgv,
-                'CPDEC_Subtotal_ConIgv'  => $value->CPDEC_Subtotal_ConIgv,
+                'CPP_Codigo' => $comprobante,
+                'PROD_Codigo' => $value->PROD_Codigo,
+                'LOTP_Codigo' => $value->LOTP_Codigo, // $lote;
+                'AFECT_Codigo' => $value->AFECT_Codigo, // $tafectacion;
+                'CPDEC_GenInd' => $value->CPDEC_GenInd,
+                'UNDMED_Codigo' => $value->UNDMED_Codigo,
+                'CPDEC_Cantidad' => $value->CPDEC_Cantidad,
+                'CPDEC_Pu' => $value->CPDEC_Pu,
+                'CPDEC_Subtotal' => $value->CPDEC_Subtotal,
+                'CPDEC_Descuento' => $value->CPDEC_Descuento,
+                'CPDEC_Igv' => $value->CPDEC_Igv,
+                'CPDEC_Total' => $value->CPDEC_Total,
+                'CPDEC_Pu_ConIgv' => $value->CPDEC_Pu_ConIgv,
+                'CPDEC_Subtotal_ConIgv' => $value->CPDEC_Subtotal_ConIgv,
                 'CPDEC_Descuento_ConIgv' => $value->CPDEC_Descuento_ConIgv,
-                'CPDEC_Igv100'           => $value->CPDEC_Igv100,
-                'CPDEC_Descuento100'     => $value->CPDEC_Descuento100,
-                'CPDEC_Costo'            => $value->CPDEC_Costo,
-                'CPDEC_Descripcion'      => $value->CPDEC_Descripcion,
-                'CPDEC_Observacion'      => $value->CPDEC_Observacion,
-                'CPDEC_FlagEstado'       => $value->CPDEC_FlagEstado,
-                'ALMAP_Codigo'           => $value->ALMAP_Codigo,
-                'GUIAREMP_Codigo'        => 0,
+                'CPDEC_Igv100' => $value->CPDEC_Igv100,
+                'CPDEC_Descuento100' => $value->CPDEC_Descuento100,
+                'CPDEC_Costo' => $value->CPDEC_Costo,
+                'CPDEC_Descripcion' => $value->CPDEC_Descripcion,
+                'CPDEC_Observacion' => $value->CPDEC_Observacion,
+                'CPDEC_FlagEstado' => $value->CPDEC_FlagEstado,
+                'ALMAP_Codigo' => $value->ALMAP_Codigo,
+                'GUIAREMP_Codigo' => 0,
             ];
-        
+
             $this->comprobantedetalle_model->insertar($d_filter);
         }
 
 
         $comprobanteInfo = $this->comprobante_model->obtener_comprobante($comprobante);
         $datos_comprobante = $comprobanteInfo[0];
-        $enviado = $this->envioSunatFac($comprobante,$datos_comprobante);
+        $enviado = $this->envioSunatFac($comprobante, $datos_comprobante);
 
         /**verificamos si tiene productos en serie y creamos la relacion con el nuevo documento**/
-        $filterSerie=new stdClass();
-        $filterSerie->SERIC_FlagEstado='1';
+        $filterSerie = new stdClass();
+        $filterSerie->SERIC_FlagEstado = '1';
         /**comprobante general:14**/
         $filterSerie->DOCUP_Codigo = 14;
         $filterSerie->SERDOC_NumeroRef = $comprobantes[0];
-        $listaSeriesDocumento=$this->seriedocumento_model->buscar($filterSerie,null,null);
-        if(count($listaSeriesDocumento)>0){
-            foreach ($listaSeriesDocumento as $valorSerie){
+        $listaSeriesDocumento = $this->seriedocumento_model->buscar($filterSerie, null, null);
+        if (count($listaSeriesDocumento) > 0) {
+            foreach ($listaSeriesDocumento as $valorSerie) {
 
                 /**insertamso serie documento**/
                 $serieCodigo = $valorSerie->SERIP_Codigo;
@@ -7825,12 +7854,12 @@ class Comprobante extends Controller
         /**FIN DE INSERTAR EN SERIE**/
 
         if ($enviado["exito"] == true)
-            exit('{"result":"success","mensaje":"'.$enviado["msj"].'", "serie":"' . $serie . '", "numero":"00' . $numero.'"}');
-        else{
+            exit('{"result":"success","mensaje":"' . $enviado["msj"] . '", "serie":"' . $serie . '", "numero":"00' . $numero . '"}');
+        else {
             $flagFilter = new stdClass();
             $flagFilter->CPC_FlagEstado = 2;
             $this->comprobante_model->modificar_comprobante($comprobante, $flagFilter);
-            exit('{"result":"error", "mensaje":"'.$enviado["msj"].'", "serie":"' . $serie . '", "numero":"00' . $numero.'"}');
+            exit('{"result":"error", "mensaje":"' . $enviado["msj"] . '", "serie":"' . $serie . '", "numero":"00' . $numero . '"}');
         }
     }
 
@@ -7970,7 +7999,7 @@ class Comprobante extends Controller
                         $filter_dism->ALMPROD_FechaModificacion = date('Y-m-d H:i:s');
 
                         $done = $this->almacenproducto_model->actualizar_stock($filter_dism);
-                        
+
                     } else {
                         $this->inventario_model->confirmInventariado($producto, $AlmacenDestino);
                         $datosAlmacenProducto = $this->almacenproducto_model->obtener($AlmacenDestino, $producto);

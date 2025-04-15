@@ -635,21 +635,25 @@
 
 
 					<div class="col-md-6">
-						<div class="row">
-							<div class="col-md-12">TIPO DE PAGO <i class="fa-solid fa-circle-plus" id="modal_d">Nuevo</i></div>
-							<div class="col-md-6">
-								<select class="form-control" id="condiciones_pago" name="condiciones_pago" onchange="ver_tipo_pago()">
-									<?php foreach ($cboFormaPago as $key => $value) { ?>
-										<option value="<?php echo $value->FORPAP_Codigo; ?>"><?php echo $value->FORPAC_Descripcion; ?></option>
-									<?php } ?>
-								</select>
+	<div class="row">
+		<div class="col-md-12">
+			TIPO DE PAGO <i class="fa-solid fa-circle-plus" id="modal_d">Nuevo</i>
+		</div>
 
-							</div>
-							<div class="col-md-6">
-								<button type="button" class="btn btn-sm btn-primary d-none" id="openModalFormaPago">Agregar +</button>
-							</div>
-						</div>
-					</div>
+		<div class="col-md-6">
+			<select class="form-control" id="condiciones_pago" name="condiciones_pago" onchange="ver_tipo_pago()">
+				<?php foreach ($cboFormaPago as $key => $value) { ?>
+					<option value="<?php echo $value->FORPAP_Codigo; ?>"><?php echo $value->FORPAC_Descripcion; ?></option>
+				<?php } ?>
+			</select>
+		</div>
+
+		<div class="col-md-6">
+			<button type="button" class="btn btn-sm btn-primary" id="openModalFormaPago">Agregar +</button>
+			<div id="othersFormasPago"></div>
+		</div>
+	</div>
+</div>
 
 
 				</div>
@@ -873,6 +877,120 @@
 		</div>
 	</div>
 </div>
+
+<!--FORMAS DE PAGO ADICIONALES-->
+<div id="formasPagoOthers" class="modal fade" role="dialog">
+        <div class="modal-dialog w-porc-60">
+            <div class="modal-content">
+                <form id="formFormasPago" method="POST">
+                    <div class="modal-header text-center">
+                        <h4 class="modal-title">
+                            <b>FORMAS DE PAGO</b>
+                        </h4>
+                    </div>
+                    <div class="modal-body panel panel-default">
+                        <div class="row">
+
+                            <div class="col-12 mt-3">
+                                <table class="table table-hover table-sm" id="tbFormasPago" style="margin-bottom: 5px;">
+                                    <tbody>
+                                        <?php
+                                        foreach ($othersFormasP as $key => $otherFP) { ?>
+                                            <tr>
+                                                <td style="width: 30%;">
+                                                    <select name="cmbFormasPago[0]"
+                                                        class="form-control h-2 comboGrande cmbFormasPago"
+                                                        id="cmbFormasPago_<?php echo $key ?>">
+                                                        <?php echo $cboFormaPagosmulti; ?>
+                                                    </select>
+                                                </td>
+                                                <td style="width: 20%;">
+                                                    <select name="cmbMoneda[]" class="form-control h-2 cmbMoneda"
+                                                        id="cmbMoneda_<?php echo $key ?>">
+                                                        <?php echo $cboMoneda; ?>
+                                                    </select>
+                                                </td>
+                                                <td style="width: 15%;">
+                                                    <input type="number" min="0" name="monto[]"
+                                                        value="<?php echo number_format($otherFP->monto, 2) ?>"
+                                                        class="form-control h-1 monto" placeholder="Monto">
+                                                </td>
+                                                <td class="text-center" style="width: 10%;">
+                                                    <button class="btn btn-sm btn-danger borrar" type="button">x</button>
+                                                </td>
+                                            </tr>
+                                        <?php }
+                                        if (count($othersFormasP) == 0) { ?>
+                                            <tr>
+                                                <td style="width: 30%;">
+                                                    <select name="cmbFormasPago[]"
+                                                        class="form-control h-2 comboGrande cmbFormasPago"
+                                                        id="cmbFormasPago_<?php echo $key ?>">
+                                                        <?php echo $cboFormaPagosmulti; ?>
+                                                    </select>
+                                                </td>
+                                                <td style="width: 20%;">
+                                                    <select name="cmbMoneda[]" class="form-control h-2 cmbMoneda"
+                                                        id="cmbMoneda_<?php echo $key ?>">
+                                                        <?php echo $cboMoneda; ?>
+                                                    </select>
+                                                </td>
+                                                <td style="width: 15%;">
+                                                    <input type="number" name="monto[]"
+                                                        value="<?php echo $otherFP->monto ?>" class="form-control h-1 monto"
+                                                        placeholder="Monto">
+                                                </td>
+                                                <td class="text-center" style="width: 10%;">
+                                                    <button class="btn btn-sm btn-danger borrar" type="button">x</button>
+                                                </td>
+                                            </tr>
+                                        <?php }
+                                        ?>
+
+                                        <script>
+                                            <?php foreach ($othersFormasP as $key => $otherFP) { ?>
+                                                $('#cmbFormasPago_<?php echo $key ?>').val(<?php echo $otherFP->FORPAP_Codigo ?>);
+                                                $('#cmbMoneda_<?php echo $key ?>').val(<?php echo $otherFP->MONED_Codigo ?>);
+                                            <?php } ?>
+                                        </script>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <button type="button" class="btn btn-sm btn-primary addFormaPago">Agregar +</button>
+                                <!-- <button type="button" class="btn btn-sm btn-primary addSeries">+</button> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <button type="button" class="btn btn-default" data-dismiss="modal">Salir</button> -->
+                        <div class="row">
+                            <table id="table-importes" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="col">Importe Total</th>
+                                        <th class="col">Importe Pagado</th>
+                                        <th class="col">Diferencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="calcTotal">0</td>
+                                        <td id="calcPagado">0</td>
+                                        <td id="calcDiferencia">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-metodo-pago">Aceptar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--FIN FORMAS DE PAGO ADICIONALES-->
 
 <div class="modal hide fade in" data-keyboard="false" data-backdrop="static" id="modal_pago">
 	<div class="modal-dialog modal-lg" role="document">
@@ -1213,10 +1331,193 @@
 
 	});
 	
-	function ver_tipo_pago() {
-    var selectedValue = $("#condiciones_de_pago").val();
-    // Realiza aquí la lógica que desees con el valor seleccionado
-    }
+	
+
+	$('#openModalFormaPago').click(function() {
+    $('#formasPagoOthers').modal('show');
+    $("#montoFP_default").val(0);
+});
+
+
+
+function ver_tipo_pago() {
+	var select = document.getElementById('condiciones_pago');
+	var currentText = select.options[select.selectedIndex].innerText.toLowerCase();
+
+	// Detectar si el texto contiene "multiple"
+	var esMultiple = /multiple/g.test(currentText);
+
+	// Mostrar u ocultar elementos
+	$("#openModalFormaPago").css('display', esMultiple ? '' : 'none');
+	$("#montoFP_default").css('display', esMultiple ? 'none' : '');
+
+	// Guardar condición en campo oculto si es nuevo registro
+	var codigo = "<?= $codigo; ?>";
+	if (codigo === "") {
+		$("#condiciones_de_pago").val(currentText);
+	}
+}
+
+$(document).ready(function () {
+
+// Ejecuta al cargar y al cambiar el select
+ver_tipo_pago();
+$('#condiciones_pago').change(function () {
+	ver_tipo_pago();
+});
+
+const tableFormasPago = $('#tbFormasPago');
+        const divOthersFormasPago = $('#othersFormasPago');
+
+        //agregale el contador
+        $('.addFormaPago').click(function() {
+            let importeTotal = $("#total").text();
+
+            let contador = tableFormasPago.find('tbody tr').length;
+
+            var tr = tableFormasPago.find('tbody tr').first().clone();
+            $(tr).find('input[type="number"]').val('');
+            $(tr).find('.cmbFormasPago').val('');
+            $(tr).find('.monto').val(0);
+            $(tr).find('.borrar').on('click', function() {
+                if (tableFormasPago.find('tbody tr').length > 1)
+                    $(tr).remove();
+            });
+            tableFormasPago.find('tbody').append(tr);
+        });
+
+        $('.borrar').click(function() {
+            var tr = $(this).closest('tr');
+            if (tableFormasPago.find('tbody tr').length > 1)
+                $(tr).remove();
+        });
+
+// Abrir modal
+$('#openModalFormaPago').click(function() {
+            $('#formasPagoOthers').modal('show');
+            $("#montoFP_default").val(0);
+
+	// Mostrar importe total en el modal
+	$("#table-importes").find('td').eq(0).text($("#total").text());
+
+            if ($('.monto').val().length == 0) {
+                $('.cmbFormasPago').val('1');
+                $('.cmbMoneda').val('1');
+            }
+        });
+
+// Al cerrar el modal, si solo hay una fila, poner monto por defecto
+$('#formasPagoOthers').on('hidden.bs.modal', function() {
+            if (tableFormasPago.find('tr').length == 1) {
+                $('#montoFP_default').val($("#total").text());
+            }
+        });
+
+// Procesar formas de pago
+$('.btn-metodo-pago').click(function() {
+
+$(divOthersFormasPago).find('*').remove();
+
+// Bandera para comprobar si hay errores
+let hayErrores = false;
+
+// Calcula el total de las formas de pago
+let totalFP = 0;
+$(tableFormasPago.find('tr .monto')).each(function(i, item) {
+	totalFP += parseFloat(item.value) || 0;
+});
+
+	let importeTotal = parseFloat($("#total").text());
+            let diferencia = totalFP - importeTotal;
+
+            // Verifica si la diferencia es distinta de 0
+            if (diferencia !== 0) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Error en el total de las formas de pago",
+                    html: `
+                <p>La diferencia es <b>${diferencia.toFixed(2)}</b>. 
+                Debe ser igual a <b>0</b> para continuar.</p>
+            `,
+                    showConfirmButton: true,
+                    timer: 5000
+                });
+                return false; // Detiene la ejecución
+            }
+
+	// Validar y capturar inputs
+	$(tableFormasPago.find('tr')).each(function(i, item) {
+                var selectFormPago = $(item).find('.cmbFormasPago').val();
+                var selectMoneda = $(item).find('.cmbMoneda').val();
+                var monto = $(item).find('.monto').val();
+
+                if (selectFormPago.length == 0) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: 'Item ' + (i + 1) + ': Complete la forma de pago',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    hayErrores = true;
+                    return false; // Detiene el recorrido actual
+
+                }
+                if (selectMoneda.length == 0) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: 'Item ' + (i + 1) + ': Complete la moneda',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    hayErrores = true;
+                    return false;
+                }
+                if (monto.length == 0) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: 'Item ' + (i + 1) + ': Complete el monto de pago',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    hayErrores = true;
+                    return false;
+                }
+
+                $(divOthersFormasPago).append('<input type="hidden" value="' + selectFormPago + '" name="formPagoFP[' + i + ']">');
+                $(divOthersFormasPago).append('<input type="hidden" value="' + selectMoneda + '" name="monedaFP[' + i + ']">');
+                $(divOthersFormasPago).append('<input type="hidden" value="' + monto + '" name="montoFP[' + i + ']">');
+            });
+
+            // Si hay errores, no cerrar el modal ni continuar
+            if (hayErrores) {
+                return false;
+            }
+
+
+            $('#formasPagoOthers').modal('toggle');
+        });
+
+$(document).on('input', '.monto', function() {
+            let total = 0;
+            $(tableFormasPago.find('tr .monto')).each(function(i, item) {
+                total += parseFloat(item.value);
+            });
+
+            $("#table-importes").find('td').eq(1).text(total);
+
+            let diferencia = total - parseFloat($("#total").text());
+            $("#table-importes").find('td').eq(2).text(diferencia);
+        });
+
+        $(document).on('blur', '.monto', function() {
+            if ($(this).val().length == 0) {
+                $(this).val(parseFloat(0));
+            }
+        });
+
+});
+
+// Evento del botón para mostrar el modal
 
 
 	// function ver_teclado(input,id=0)
@@ -1372,4 +1673,5 @@
             });
         });
 </script>
+
 

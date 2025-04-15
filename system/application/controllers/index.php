@@ -42,6 +42,8 @@ class Index extends Controller{
 		$this->load->model('maestros/tipocodigo_model');
 		$this->load->model('almacen/productounidad_model');
 		$this->load->model('almacen/almacen_model');
+		$this->load->model('maestros/moneda_model');
+		
     
 		$almacenInfo = $this->almacen_model->getAlmacens($filter);
 		
@@ -61,6 +63,8 @@ class Index extends Controller{
 
 		//TRAER LOS METODOS DE PAGO (EFECTIVO, YAPE, PLIN, ETC)
 		$data['cboFormaPagosmulti'] = $this->OPTION_generador($this->formapago_model->listarmulti(), 'FORPAP_Codigo', 'FORPAC_Descripcion', '1'); 
+
+		$data['cboMoneda'] = $this->OPTION_generador($this->moneda_model->listar(), 'MONED_Codigo', 'MONED_Descripcion', $moneda);
 
     	$fav = $this->producto_model->productos_favs($almacenInfo[0]->ALMAP_Codigo);
 
@@ -237,7 +241,7 @@ class Index extends Controller{
 				}
 			}
 			else {
-				$msgError = "<br><div align='center' class='error'>Usuario y/o contrase«Ğa no valido.</div>";
+				$msgError = "<br><div align='center' class='error'>Usuario y/o contraseï¿½ï¿½ï¿½a no valido.</div>";
 				$this->index($msgError);
 			}
 		}

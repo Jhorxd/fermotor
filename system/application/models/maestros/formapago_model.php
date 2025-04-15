@@ -85,7 +85,7 @@ class Formapago_Model extends Model{
      
       public function listar_punto_venta()
      {
-        $sql = "SELECT * FROM cji_formapago WHERE FORPAC_FlagEstado = 1 and FORPAP_Codigo not in (0,4,5,8,22,17,16,15) ORDER BY FORPAP_Codigo desc;";
+        $sql = "SELECT * FROM cji_formapago WHERE FORPAC_FlagEstado = 1 and FORPAP_Codigo not in (0,4,5,8,17,16,15) ORDER BY FORPAP_Codigo asc;";
         $query = $this->db->query($sql); 
         
         if($query->num_rows>0){
